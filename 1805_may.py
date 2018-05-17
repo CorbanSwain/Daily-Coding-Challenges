@@ -10,6 +10,7 @@ def _180516():
     17. Bonus: Can you do this in one pass?"""
 
     def sum_in(ls, k):
+        ls = list(ls)
         try:
             del ls[ls.index(k / 2)]
         except ValueError:
