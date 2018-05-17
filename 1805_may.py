@@ -10,6 +10,9 @@
 
 
 def sum_in(ls, k):
+    half = k / 2
+    if half in ls:
+        del ls[ls.index(half))
     return any(k - x in ls for x in ls)
 
 
