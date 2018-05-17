@@ -56,6 +56,8 @@ def _180517():
         return [mult / x for x in ls]
 
     def prod_list_2(ls):
+        # solution without division
+
         # create a list of ones
         out = [1 for _ in ls]
         for i, x in enumerate(ls):
@@ -73,7 +75,6 @@ def _180517():
         ([3, 2, 1], [2, 3, 6]),
         ([], []),
         ([20], [1]),
-        ('hello', [1])
     ]
     for a, b in tests:
         assert all(x - y < epsilon for x, y in zip(prod_list_1(a), b))
