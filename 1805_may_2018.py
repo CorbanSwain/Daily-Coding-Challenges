@@ -13,9 +13,18 @@ def _180516():
 
     def sum_in(ls, k):
         try:
-            del ls[ls.index(k / 2)]
+            # check if half of k is a value in the list
+            # this will raise a ValueError if k / 2 is not in the list
+            i_half = ls.index(k / 2)
+
+            # if k / 2 is in the list delete one of the instances from the list
+            ls = list(ls) # copy to prevent mutating the original list
+            del ls[i_half]
         except ValueError:
             pass
+
+        # the sum if present if k minus a value in the list is a
+        # number also in the list
         return any(k - x in ls for x in ls)
 
     # TESTS
