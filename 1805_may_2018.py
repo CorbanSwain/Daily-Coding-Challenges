@@ -189,5 +189,44 @@ def _180518():
     assert deserialize(serialize(node)).left.left.val == 'left.left'
 
 
+def _180519():
+    """This problem was asked by Stripe.
+
+    Given an array of integers, find the first missing positive integer in
+    linear time and constant space. In other words, find the lowest positive
+    integer that does not exist in the array. The array can contain duplicates
+    and negative numbers as well.
+
+    For example, the input [3, 4, -1, 1] should give 2. The input [1, 2, 0]
+    should give 3.
+
+    You can modify the input array in-place.
+    """
+
+    def lowint(l):
+        top = max(l)
+        if min(l) < 1:
+            l = [x for x in l if x > 0]
+        for x in range(1, top):
+            if x not in l:
+                return x
+            else:
+                while True:
+                    try:
+                        del l[l.index(x)]
+                    except ValueError:
+                        break
+        return top + 1
+
+    # TESTS
+    tests = [([3, 4, -1, 1], 2), ([1, 2, 0], 3)]
+    for a, b in tests:
+        assert lowint(a) == b
+
+    a = list(range(int(5e4)))
+    b = a.pop(len(a) // 2)
+    assert lowint(a) == b
+
+
 if __name__ == "__main__":
-    _180518()
+    _180519()
