@@ -70,16 +70,124 @@ def _180517():
 
     # TESTS
     epsilon = 1e-10
-    tests = [
-        ([1, 2, 3, 4, 5], [120, 60, 40, 30, 24]),
-        ([3, 2, 1], [2, 3, 6]),
-        ([], []),
-        ([20], [1]),
-    ]
+    tests = [([1, 2, 3, 4, 5], [120, 60, 40, 30, 24]),
+             ([3, 2, 1], [2, 3, 6]),
+             ([], []),
+             ([20], [1])]
     for a, b in tests:
         assert all(x - y < epsilon for x, y in zip(prod_list_1(a), b))
         assert all(x - y < epsilon for x, y in zip(prod_list_2(a), b))
 
 
+def _180518():
+    """This problem was asked by Google.
+
+    Given the root to a binary tree, implement serialize(root), which serializes
+    the tree into a string, and deserialize(s), which deserializes the string
+    back into the tree.
+
+    For example, given the following Node class
+
+    class Node:
+        def __init__(self, val, left=None, right=None):
+            self.val = val
+            self.left = left
+            self.right = right
+
+    The following test should pass:
+
+    node = Node('root', Node('left', Node('left.left')), Node('right'))
+    assert deserialize(serialize(node)).left.left.val == 'left.left'
+    """
+
+    from enum import Enum, auto
+
+    class Node:
+        def __init__(self, val, left=None, right=None):
+            self.val = val
+            self.left = left
+            self.right = right
+
+    def quotify(s):
+        return '\'' + s + '\''
+
+    def serialize(n):
+        if n is None:
+            return 'None'
+        ser_str = '%s(%s,%s)' % (quotify(n.val),
+                                 serialize(n.left),
+                                 serialize(n.right))
+        return ser_str
+
+    class Token(Enum):
+        SEPARATOR = auto()
+        LITERAL = auto()
+
+    def lex(ser_str):
+        tokens = []
+        is_parsing_str = False
+        x = ''
+        for c in ser_str:
+            if c in ['(', ')', ',']:
+                tokens.append((Token.SEPARATOR, c))
+            elif c == '\'':
+                if is_parsing_str:
+                    tokens.append((Token.LITERAL, x))
+                    x = ''
+                    is_parsing_str = False
+                else:
+                    is_parsing_str = True
+            else:
+                x += c
+                if not is_parsing_str:
+                    if x == 'None':
+                        tokens.append((Token.LITERAL, None))
+                        x = ''
+        return tokens
+
+    def deserialize(ser_str=None, tokens=None):
+        if tokens is None:
+            tokens = lex(ser_str)
+
+        t0, v0 = tokens.pop(0)
+        assert t0 is Token.LITERAL
+        n = Node(v0)
+        t_left = []
+        t_right = []
+        is_parsing_left = True
+        level = 0
+        for t, v in tokens:
+            if t is Token.SEPARATOR:
+                if v == '(':
+                    level += 1
+                elif v == ')':
+                    level -= 1
+                elif v == ',':
+                    if level == 1:
+                        is_parsing_left = False
+                else:
+                    raise ValueError('Unexpected separator token \'%s\'.' % v)
+
+                if level == 1:
+                    continue
+                if level == 0:
+                    break
+
+            if is_parsing_left:
+                t_left.append((t, v))
+            else:
+                t_right.append((t, v))
+
+        if not (len(t_left) == 1 and t_left[0][1] is None):
+            n.left = deserialize(tokens=t_left)
+        if not (len(t_right) == 1 and t_right[0][1] is None):
+            n.right = deserialize(tokens=t_right)
+        return n
+
+    # TEST
+    node = Node('root', Node('left', Node('left.left')), Node('right'))
+    assert deserialize(serialize(node)).left.left.val == 'left.left'
+
+
 if __name__ == "__main__":
-    _180517()
+    _180518()
