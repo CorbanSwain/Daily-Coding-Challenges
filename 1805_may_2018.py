@@ -204,18 +204,20 @@ def _180519():
     """
 
     def lowint(l):
-        top = max(l)
-        if min(l) < 1:
-            l = [x for x in l if x > 0]
-        for x in range(1, top):
-            if x not in l:
-                return x
+        l.sort(reverse=True)
+        out = 1
+        top = l.pop(0)
+        if top < out:
+            return out
+        while l:
+            new = l.pop()
+            if new <= 1:
+                continue
+            out = out + 1
+            if out == new:
+                pass
             else:
-                while True:
-                    try:
-                        del l[l.index(x)]
-                    except ValueError:
-                        break
+                return out
         return top + 1
 
     # TESTS
@@ -223,7 +225,7 @@ def _180519():
     for a, b in tests:
         assert lowint(a) == b
 
-    a = list(range(int(5e4)))
+    a = list(range(int(1e7)))
     b = a.pop(len(a) // 2)
     assert lowint(a) == b
 
