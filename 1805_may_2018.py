@@ -230,5 +230,40 @@ def _180519():
     assert lowint(a) == b
 
 
+def _180520():
+    """This problem was asked by Jane Street.
+
+    cons(a, b) constructs a pair, and car(pair) and cdr(pair) returns the first
+    and last element of that pair. For example, car(cons(3, 4)) returns 3, and
+    cdr(cons(3, 4)) returns 4.
+
+    Given this implementation of cons:
+
+    def cons(a, b):
+        def pair(f):
+            return f(a, b)
+    return pair
+
+    Implement car and cdr."""
+
+    def cons(a, b):
+        def pair(f):
+            return f(a, b)
+        return pair
+
+    def pair_func(*args):
+        return args
+
+    def car(pair):
+        return pair(pair_func)[0]
+
+    def cdr(pair):
+        return pair(pair_func)[-1]
+
+    # TESTS
+    assert car(cons(3, 4)) is 3
+    assert cdr(cons(3, 4)) is 4
+
+
 if __name__ == "__main__":
-    _180519()
+    _180520()
