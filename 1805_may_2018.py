@@ -321,21 +321,30 @@ def _180521():
                 self.tail = new
             return None  # modification in place
 
+        def append(self, item):
+            return self.add(item)
+
         def get(self, index):
-            assert 0 <= index < len(self)
-            n_steps = len(self) - index
-            p = (0, get_pointer(self.tail))
+            if not 0 <= index < len(self):
+                raise IndexError('Index out of bounds.')
+            n_steps = len(self) - index - 1
+            node = self.tail
+            p = (get_pointer(node), node.p_both)
             while n_steps > 0:
                 node = dereference_pointer(p[1])
                 p = (p[1], node.p_both ^ p[0])
                 n_steps -= 1
-            return node.value
+            return node
+
+        def __getitem__(self, key):
+            return self.get(key).value
+
 
     # TEST
     test_ls = ['hi', 278, ('good', 'bad')]
     ll = LinkedList()
-    [ll.add(item) for item in test_ls]
-    assert all(ll.get(i) is test_ls[i] for i in range(len(test_ls)))
+    [ll.append(item) for item in test_ls]
+    assert all(ll[i] is test_ls[i] for i in range(len(test_ls)))
 
 
 if __name__ == "__main__":
