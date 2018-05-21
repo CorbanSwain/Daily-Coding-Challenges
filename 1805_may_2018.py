@@ -128,6 +128,8 @@ def _180518():
         is_parsing_str = False
         x = ''
         for c in ser_str:
+            # FIXME - string parsing is problematic ... '(' within a string
+            # will break the lexer
             if c in ['(', ')', ',']:
                 tokens.append((Token.SEPARATOR, c))
             elif c == '\'':
@@ -224,7 +226,6 @@ def _180519():
     tests = [([3, 4, -1, 1], 2), ([1, 2, 0], 3)]
     for a, b in tests:
         assert lowint(a) == b
-
     a = list(range(int(1e7)))
     b = a.pop(len(a) // 2)
     assert lowint(a) == b
@@ -265,5 +266,77 @@ def _180520():
     assert cdr(cons(3, 4)) is 4
 
 
+def _180521():
+    """This problem was asked by Google.
+
+    An XOR linked list is a more memory efficient doubly linked list. Instead of
+    each node holding next and prev fields, it holds a field named both, which
+    is an XOR of the next node and the previous node. Implement an XOR linked
+    list; it has an add(element) which adds the element to the end, and a
+    get(index) which returns the node at index.
+
+    If using a language that has no pointers (such as Python), you can assume
+    you have access to get_pointer and dereference_pointer functions that
+    converts between nodes and memory addresses."""
+
+    obj_store = {}
+
+    def get_pointer(x):
+        p = id(x)
+        obj_store.setdefault(p, x)
+        return p
+
+    def dereference_pointer(p):
+        try:
+            return obj_store[p]
+        except KeyError:
+            raise ValueError('p must be a valid pointer obtained from'
+                             ' get_pointer().')
+
+    class Node:
+        def __init__(self, value, p_both=None):
+            self.value = value
+            self.p_both = p_both
+
+    class LinkedList:
+        def __init__(self):
+            self.tail = None
+            self._len = 0
+
+        def __len__(self):
+            return self._len
+
+        def add(self, element):
+            self._len += 1
+            if self.tail is None:
+                self.tail = Node(element)
+            else:
+                new = Node(element, get_pointer(self.tail))
+                p_new = get_pointer(new)
+                try:
+                    self.tail.p_both ^= p_new
+                except TypeError:
+                    # self.tail.p_both is None; that is, tail has no previous
+                    self.tail.p_both = p_new
+                self.tail = new
+            return None  # modification in place
+
+        def get(self, index):
+            assert 0 <= index < len(self)
+            n_steps = len(self) - index
+            p = (0, get_pointer(self.tail))
+            while n_steps > 0:
+                node = dereference_pointer(p[1])
+                p = (p[1], node.p_both ^ p[0])
+                n_steps -= 1
+            return node.value
+
+    # TEST
+    test_ls = ['hi', 278, ('good', 'bad')]
+    ll = LinkedList()
+    [ll.add(item) for item in test_ls]
+    assert all(ll.get(i) is test_ls[i] for i in range(len(test_ls)))
+
+
 if __name__ == "__main__":
-    _180520()
+    _180521()
