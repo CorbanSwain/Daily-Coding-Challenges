@@ -1,5 +1,5 @@
-#!/bin/python3
-# 1805_may.py
+#!python3
+# 1805_may_2018.py
 # Corban Swain, 2018
 # May Daily Coding Challenges
 
@@ -347,5 +347,42 @@ def _180521():
     assert all(ll[i] is test_ls[i] for i in range(len(test_ls)))
 
 
+def _180522():
+    """This problem was asked by Facebook.
+
+    Given the mapping a = 1, b = 2, ... z = 26, and an encoded message, count
+    the number of ways it can be decoded.
+
+    For example, the message '111' would give 3, since it could be decoded as
+    'aaa', 'ka', and 'ak'.
+
+    You can assume that the messages are decodable. For example, '001' is not
+    allowed."""
+
+    def count_decodes(string, greedy=None):
+        if greedy is None:
+            return count_decodes(string, True) + count_decodes(string, False)
+        else:
+            string = list(string)
+            x = int(string.pop(0))
+
+            if greedy:
+                if not string:
+                    return 0
+                x = 10 * x + int(string.pop(0))
+                if x > 26:
+                    return 0
+
+            if string:
+                return count_decodes(string)
+            else:
+                return 1
+
+            # TEST
+    assert count_decodes('111') == 3
+
+
+
+
 if __name__ == "__main__":
-    _180521()
+    _180522()
