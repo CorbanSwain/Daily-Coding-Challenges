@@ -407,6 +407,7 @@ def _180523():
             self.left = left  # type: Node
             self.right = right  # type: Node
 
+    # FIXME - this is all wrong, need to assess the whole subtree
     def count_unival(head: Node) -> int:
         if head is None:
             return 0
@@ -414,8 +415,9 @@ def _180523():
         a = head.left
         b = head.right
         count = 0
-        if a is None and b is None:
-            count = 1
+        if a is None or b is None:
+            if a is b:
+                count = 1
         else:
             try:
                 if a.value == b.value:
