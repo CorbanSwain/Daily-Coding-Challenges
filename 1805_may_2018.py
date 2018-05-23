@@ -382,7 +382,53 @@ def _180522():
     assert count_decodes('111') == 3
 
 
+def _180523():
+    """This problem was asked by Google.
+
+    A unival tree (which stands for "universal value") is a tree where all nodes
+    under it have the same value.
+
+    Given the root to a binary tree, count the number of unival subtrees.
+
+    For example, the following tree has 5 unival subtrees:
+
+       0
+      / \
+     1   0
+        / \
+       1   0
+      / \
+     1   1
+    """
+
+    class Node:
+        def __init__(self, value, left=None, right=None):
+            self.value = value
+            self.left = left  # type: Node
+            self.right = right  # type: Node
+
+    def count_unival(head: Node) -> int:
+        if head is None:
+            return 0
+
+        a = head.left
+        b = head.right
+        count = 0
+        if a is None and b is None:
+            count = 1
+        else:
+            try:
+                if a.value == b.value:
+                    count = 1
+            except AttributeError:
+                pass
+
+        return count + count_unival(a) + count_unival(b)
+
+    # TEST
+    tree = Node(0, Node(1), Node(0, Node(1, Node(1), Node(1)), Node(0)))
+    assert count_unival(tree) == 5
 
 
 if __name__ == "__main__":
-    _180522()
+    _180523()
