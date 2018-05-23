@@ -403,29 +403,42 @@ def _180523():
 
     class Node:
         def __init__(self, value, left=None, right=None):
-            self.value = value
+            self.value = value  # type: Any
             self.left = left  # type: Node
             self.right = right  # type: Node
 
-    # FIXME - this is all wrong, need to assess the whole subtree
-    def count_unival(head: Node) -> int:
+    def is_leaf(node: Node) -> bool:
+        return node.left is None and node.right is None
+
+    def count_unival_helper(head: Node) -> (bool, int):
         if head is None:
-            return 0
+            return None, 0
+        if is_leaf(head):
+            return True, 1
 
-        a = head.left
-        b = head.right
-        count = 0
-        if a is None or b is None:
-            if a is b:
-                count = 1
+        sub_is_unis, sub_counts = tuple(zip(count_unival_helper(head.left),
+                                        count_unival_helper(head.right)))
+
+        if any(x is False for x in sub_is_unis):
+            is_uni = False
         else:
-            try:
-                if a.value == b.value:
-                    count = 1
-            except AttributeError:
-                pass
+            # left and right cannot both be None because of is_leaf() check
+            if sub_is_unis[0] is not None:
+                is_uni = head.left.value == head.value
+            else:
+                is_uni = True
 
-        return count + count_unival(a) + count_unival(b)
+            if is_uni and sub_is_unis[1] is not None:
+                is_uni &= head.right.value == head.value
+
+        total_sub_counts = sum(sub_counts)
+        if is_uni:
+            return True, total_sub_counts + 1
+        else:
+            return False, total_sub_counts
+
+    def count_unival(head: Node) -> int:
+        return count_unival_helper(head)[1]
 
     # TEST
     tree = Node(0, Node(1), Node(0, Node(1, Node(1), Node(1)), Node(0)))
