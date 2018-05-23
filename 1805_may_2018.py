@@ -410,39 +410,37 @@ def _180523():
     def is_leaf(node: Node) -> bool:
         return node.left is None and node.right is None
 
-    def count_unival_helper(head: Node) -> (bool, int):
+    def count_unival_helper(head: Node):
         if head is None:
-            return None, 0
+            return None
         if is_leaf(head):
-            return True, 1
+            return True, 1, head
 
-        sub_is_unis, sub_counts = tuple(zip(count_unival_helper(head.left),
-                                        count_unival_helper(head.right)))
+        out = (count_unival_helper(n) for n in (head.left, head.right))
+        out = (tup for tup in out if tup is not None)
 
-        if any(x is False for x in sub_is_unis):
-            is_uni = False
-        else:
-            # left and right cannot both be None because of is_leaf() check
-            if sub_is_unis[0] is not None:
-                is_uni = head.left.value == head.value
-            else:
-                is_uni = True
+        is_uni = True
+        total_counts = 0
+        for sub_uni, sub_count, sub_node in out:
+            if is_uni:
+                if sub_uni:
+                    is_uni = sub_node.value == head.value
+                else:
+                    is_uni = False
+            total_counts += sub_count
 
-            if is_uni and sub_is_unis[1] is not None:
-                is_uni &= head.right.value == head.value
-
-        total_sub_counts = sum(sub_counts)
         if is_uni:
-            return True, total_sub_counts + 1
-        else:
-            return False, total_sub_counts
+            total_counts += 1
+        return is_uni, total_counts, head
 
     def count_unival(head: Node) -> int:
         return count_unival_helper(head)[1]
 
-    # TEST
+    # TESTS
     tree = Node(0, Node(1), Node(0, Node(1, Node(1), Node(1)), Node(0)))
     assert count_unival(tree) == 5
+
+
 
 
 if __name__ == "__main__":
