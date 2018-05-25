@@ -403,7 +403,7 @@ def _180523():
 
     class Node:
         def __init__(self, value, left=None, right=None):
-            self.value = value  # type: Any
+            self.value = value
             self.left = left  # type: Node
             self.right = right  # type: Node
 
@@ -441,7 +441,71 @@ def _180523():
     assert count_unival(tree) == 5
 
 
+def _180524():
+    """This problem was asked by Airbnb.
+
+    Given a list of integers, write a function that returns the largest sum of
+    non-adjacent numbers. Numbers can be 0 or negative.
+
+    For example, [2, 4, 6, 8] should return 12, since we pick 4 and 8.
+    [5, 1, 1, 5] should return 10, since we pick 5 and 5.
+
+    Follow-up: Can you do this in O(N) time and constant space?"""
+
+    # by brute force we can simply calculate all of the posibilities
+    def big_sum_1(lst):
+        s = None
+        for i, x in enumerate(lst):
+            for j, y in enumerate(lst):
+                valid = all((j is not i, (j - 1) is not i, (j + 1) is not i))
+                if valid:
+                    if s is None:
+                        s = x + y
+                    else:
+                        s = max(s, x + y)
+        return s
+    # this will run in O(N^2) time and constant space
+
+    # We can go through the list once and keep track of the top two values
+    # and their indices, not allowing two numbers side-by-side to both be in
+    # the list, and taking precedence to keep the biggest number not the the
+    # second biggest
+    class Item:
+        def __init__(self, index, val):
+            self.index = index
+            self.val = val
+
+    def big_sum_2(lst):
+        if len(lst) < 3:
+            raise ValueError('List must have at least 3 values')
+        top = [None, None, None]
+        for i, x in enumerate(lst):
+            new_item = Item(i, x)
+            for j, item in enumerate(top):
+                if item is None:
+                    top[j] = new_item
+                    break
+                if x > item.val:
+                    del top[-1]
+                    top.insert(j, new_item)
+                    break
+
+        diff = abs(top[0].index - top[1].index)
+        return top[0].val + (top[2].val if diff == 1 else top[1].val)
+
+    # TESTS
+    tests = (([2, 4, 6, 8], 12), ([5, 1, 1, 5], 10))
+    for query, ans in tests:
+        assert big_sum_1(query) == ans
+        assert big_sum_2(query) == ans
+
+    from timeit import timeit
+    print('Time 1: %8.3f s' % timeit(lambda: big_sum_1(range(int(1e3))),
+                                     number=10))
+    print('Time 2: %8.3f s' % timeit(lambda: big_sum_2(range(int(1e3))),
+                                     number=10))
+
 
 
 if __name__ == "__main__":
-    _180523()
+    _180524()
