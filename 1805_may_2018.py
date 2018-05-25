@@ -521,17 +521,17 @@ def _180525():
     from time import sleep
 
     class Job(Thread):
-        def __init__(self, func, delay=0):
+        def __init__(self, func, delay=0, **kwargs):
             self.delay = delay
-            Thread.__init__(self, target=func)
+            Thread.__init__(self, target=func, **kwargs)
 
         def run(self):
             if self.delay > 0:
-                sleep(self.delay/1000)
+                sleep(self.delay)
             Thread.run(self)
 
-    def schedule(func, delay=0):
-        job = Job(func, delay)
+    def schedule(func, delay: int=0):
+        job = Job(func, delay/1000)
         job.start()
 
     # TEST
