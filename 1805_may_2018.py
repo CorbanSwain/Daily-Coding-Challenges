@@ -529,8 +529,6 @@ def _180524():
     plt.show()
 
 
-
-
 def _180525():
     """This problem was asked by Apple.
 
@@ -543,12 +541,12 @@ def _180525():
     class Job(Thread):
         def __init__(self, func, delay=0, **kwargs):
             self.delay = delay
-            Thread.__init__(self, target=func, **kwargs)
+            super().__init__(target=func, **kwargs)
 
         def run(self):
             if self.delay > 0:
                 sleep(self.delay)
-            Thread.run(self)
+            super().run()
 
     def schedule(func, delay: int=0):
         job = Job(func, delay/1000)
@@ -562,7 +560,7 @@ def _180525():
 
     for i in range(10):
         s = '... Echoing %2d!' % (i + 1)
-        schedule(make_echo_func(s), i * 1000)
+        schedule(make_echo_func(s), (i + 1) * 1000)
     print('Done Main!')
 
 
