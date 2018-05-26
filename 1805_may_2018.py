@@ -205,6 +205,7 @@ def _180519():
     You can modify the input array in-place.
     """
 
+    # FIXME - This is not in linear time because of the sort step
     def lowint(l):
         l.sort(reverse=True)
         out = 1
@@ -452,7 +453,7 @@ def _180524():
 
     Follow-up: Can you do this in O(N) time and constant space?"""
 
-    # by brute force we can simply calculate all of the posibilities
+    # by brute force we can simply calculate all of the possibilities
     def big_sum_1(lst):
         s = None
         for i, x in enumerate(lst):
@@ -469,7 +470,11 @@ def _180524():
     # We can go through the list once and keep track of the top two values
     # and their indices, not allowing two numbers side-by-side to both be in
     # the list, and taking precedence to keep the biggest number not the the
-    # second biggest
+    # second biggest ... this doesnt work ...
+
+    # Alternatively, keep track of the top three numbers, if the top 2 are
+    # next to each other, return that, otherwise return the top plus the
+    # third highest
     class Item:
         def __init__(self, index, val):
             self.index = index
@@ -526,6 +531,40 @@ def _180524():
 
 
 
+def _180525():
+    """This problem was asked by Apple.
+
+    Implement a job scheduler which takes in a function f and an integer n, and
+    calls f after n milliseconds."""
+
+    from threading import Thread
+    from time import sleep
+
+    class Job(Thread):
+        def __init__(self, func, delay=0, **kwargs):
+            self.delay = delay
+            Thread.__init__(self, target=func, **kwargs)
+
+        def run(self):
+            if self.delay > 0:
+                sleep(self.delay)
+            Thread.run(self)
+
+    def schedule(func, delay: int=0):
+        job = Job(func, delay/1000)
+        job.start()
+
+    # TEST
+    def make_echo_func(x):
+        def echo_func():
+            print(x)
+        return echo_func
+
+    for i in range(10):
+        s = '... Echoing %2d!' % (i + 1)
+        schedule(make_echo_func(s), i * 1000)
+    print('Done Main!')
+
 
 if __name__ == "__main__":
-    _180524()
+    _180525()
