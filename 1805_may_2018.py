@@ -480,14 +480,13 @@ def _180524():
             raise ValueError('List must have at least 3 values')
         top = [None, None, None]
         for i, x in enumerate(lst):
-            new_item = Item(i, x)
             for j, item in enumerate(top):
                 if item is None:
-                    top[j] = new_item
+                    top[j] = Item(i, x)
                     break
                 if x > item.val:
                     del top[-1]
-                    top.insert(j, new_item)
+                    top.insert(j, Item(i, x))
                     break
 
         diff = abs(top[0].index - top[1].index)
@@ -504,6 +503,27 @@ def _180524():
                                      number=10))
     print('Time 2: %8.3f s' % timeit(lambda: big_sum_2(range(int(1e3))),
                                      number=10))
+    import numpy as np
+    import matplotlib.pyplot as plt
+    ns = [3, 10, 50, 100, 500, 1e3]
+    y1 = np.zeros(len(ns))
+    y2 = np.zeros(len(ns))
+    for i, n in enumerate(ns):
+        y1[i] = timeit(lambda: big_sum_1(range(int(n))), number=100)
+        y2[i] = timeit(lambda: big_sum_2(range(int(n))), number=100)
+
+    x = np.array(ns)
+    plt.style.use('seaborn-notebook')
+    ax1 = plt.subplot(211)
+    plt.plot(x, y1, x, y2)
+    # ax1.set_xscale('log')
+    ax2 = plt.subplot(212)
+    # ax2.set_xscale('log')
+    plt.plot(x, y2)
+    plt.tight_layout()
+    plt.show()
+
+
 
 
 
