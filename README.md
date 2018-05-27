@@ -1,5 +1,5 @@
-# Daily-Coding-Challenges
-My answers to daily coding challenges from dailycodingproblem.com
+# Daily Coding Challenges
+My answers to daily coding challenges from [dailycodingproblem.com](https://www.dailycodingproblem.com/)
 
 ***
 ## 2018
