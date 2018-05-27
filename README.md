@@ -3,4 +3,6 @@ My answers to daily coding challenges from dailycodingproblem.com
 
 ***
 ## 2018
-* May -> Python
+| Month | Language |
+| --- | --- |
+| [May](/1805_may_2018.py) | Python |
