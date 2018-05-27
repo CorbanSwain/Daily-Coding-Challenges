@@ -577,6 +577,8 @@ def _180526():
     Hint: Try preprocessing the dictionary into a more efficient data structure
     to speed up queries."""
 
+    from functools import reduce
+
     class Entry:
         def __init__(self, s):
             self.s = s
@@ -588,14 +590,11 @@ def _180526():
         def __init__(self, value, depth=-1):
             self.value = value
             self._depth = depth
-            self.sub_nodes = {}
-            self.entries = []
+            self.sub_nodes = {}  # type: dict
+            self.entries = []  # type: list
 
         def __getitem__(self, key):
-            try:
-                return self.sub_nodes[key]
-            except KeyError:
-                return None
+            return self.sub_nodes[key]
 
         def __setitem__(self, key, value):
             self.sub_nodes[key] = value
@@ -609,9 +608,12 @@ def _180526():
                     c = entry.s[idx]
                 except IndexError:
                     continue
-                if self[c] is None:
-                    self[c] = Node(c, idx)
-                self[c].entries.append(entry)
+                try:
+                    sub_node = self[c]
+                except KeyError:
+                    sub_node = Node(c, idx)
+                    self[c] = sub_node
+                sub_node.entries.append(entry)
 
             # base case comes when self.sub_nodes is an empty dict
             for n in self.sub_nodes.values():
@@ -621,30 +623,33 @@ def _180526():
     class Autocompleter:
         def __init__(self, dictionary=None):
             self.dictionary = dictionary
-            self._tree_dict = None
+            self._tree_dict = None  # type: Node
 
         # for brute force, we can just look at every item in the list
-        def autocomplete_bf(self, query):
-            return [s for s in self.dictionary
-                    if query in s and s.index(query) is 0]
+        def autocomplete_bf(self, query, useLambda=True):
+            if useLambda:
+                return filter(lambda s: query in s and s.index(query) is 0,
+                              self.dictionary)
+            else:
+                return [s for s in self.dictionary if query in s and
+                        s.index(query) is 0]
 
         # alternatively we can construct a tree where each node layer contains
         # a list of the items that have a character in each successive position
         @property
-        def tree_dict(self):
+        def tree_dict(self) -> Node:
             if self._tree_dict is None:
-                entries = [Entry(s) for s in self.dictionary]
+                entries = map(lambda s: Entry(s), self.dictionary)
                 self._tree_dict = Node('')
                 self._tree_dict.parse_entries(entries)
             return self._tree_dict
 
         def autocomplete(self, query):
-            node = self.tree_dict
-            for c in query:
-                node = node[c]
-                if node is None:
-                    return []
-            return [e.s for e in node.entries]
+            try:
+                node = reduce(lambda n, char: n[char], query, self.tree_dict)
+            except KeyError:
+                return []
+            return map(lambda e: e.s, node.entries)
 
     # TESTS
     d = ['dog', 'deer', 'deal']
@@ -656,36 +661,42 @@ def _180526():
     from timeit import timeit
     from random import randint
 
-    def wrap(statement, *args):
+    def wrap(statement, *args, **kwargs):
         def fun():
-            statement(*args)
+            statement(*args, **kwargs)
         return fun
 
-    d = [str(randint(0, int(1e7))) for _ in range(int(5e5))]
+    d = map(lambda _: str(randint(0, int(1e7))), range(int(1e6)))
     ac = Autocompleter(d)
     q = '9542'
-    n_queries = 1000
-    print(' Brute force: %8.4f s' % timeit(wrap(ac.autocomplete_bf, q),
-                                           number=n_queries))
-    print('Compile tree: %8.4s s' % timeit(wrap(ac.autocomplete, ''),
-                                           number=1))
-    print(' Tree Method: %8.4f s' % timeit(wrap(ac.autocomplete, q),
-                                           number=n_queries))
-    # >  Brute force:  18.8421 s
-    # > Compile tree:     3.78 s
-    # >  Tree Method:   0.0040 s
+    n_queries = 100000
+    print('Brute force (ls cmp): %8.4f s' % timeit(
+        wrap(ac.autocomplete_bf, q, False),
+        number=n_queries))
+    print('Brute force (filter): %8.4f s' % timeit(wrap(ac.autocomplete_bf, q),
+                                                   number=n_queries))
+    print('      Compiling tree: %8.4s s' % timeit(wrap(ac.autocomplete, ''),
+                                                   number=1))
+    print('         Tree Method: %8.4f s' % timeit(wrap(ac.autocomplete, q),
+                                                   number=n_queries))
+    # > Brute force (ls cmp):   1.4382 s
+    # > Brute force (filter):   0.0366 s
+    # >       Compiling tree:     2.45 s
+    # >          Tree Method:   0.1232 s
 
     # Notes
     # N = number of items in dictionary
     # K = number of queries
     # L = number of chars in the query
-    #
+
     # The brute force method executes in O(N * K) time
+
     # The compilation of the tree executes in O(N^2) time ( ... at worst -> all
     # elements the same ... maybe call set on the dictionary at creation)
+
     # The tree autocomplete method executed in O(K * L) time,
     # this is independent of N. So although the initial compilation will take
-    # a while, after many queries orders of magnitude time will be saved,
+    # a while, after many queries, orders of magnitude time will be saved,
     # especially for a large dictionary.
 
 
