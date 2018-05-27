@@ -650,8 +650,8 @@ def _180526():
     d = ['dog', 'deer', 'deal']
     q = 'de'
     ac = Autocompleter(d)
-    assert set(ac.autocomplete_bf(q)) == set(['deer', 'deal'])
-    assert set(ac.autocomplete(q)) == set(['deer', 'deal'])
+    assert set(ac.autocomplete_bf(q)) == {'deer', 'deal'}
+    assert set(ac.autocomplete(q)) == {'deer', 'deal'}
 
     from timeit import timeit
     from random import randint
@@ -666,11 +666,27 @@ def _180526():
     q = '9542'
     n_queries = 1000
     print(' Brute force: %8.4f s' % timeit(wrap(ac.autocomplete_bf, q),
-                                          number=n_queries))
+                                           number=n_queries))
     print('Compile tree: %8.4s s' % timeit(wrap(ac.autocomplete, ''),
-                                            number=1))
+                                           number=1))
     print(' Tree Method: %8.4f s' % timeit(wrap(ac.autocomplete, q),
-                                          number=n_queries))
+                                           number=n_queries))
+    # >  Brute force:  18.8421 s
+    # > Compile tree:     3.78 s
+    # >  Tree Method:   0.0040 s
+
+    # Notes
+    # N = number of items in dictionary
+    # K = number of queries
+    # L = number of chars in the query
+    #
+    # The brute force method executes in O(N * K) time
+    # The compilation of the tree executes in O(N^2) time ( ... at worst -> all
+    # elements the same ... maybe call set on the dictionary at creation)
+    # The tree autocomplete method executed in O(K * L) time,
+    # this is independent of N. So although the initial compilation will take
+    # a while, after many queries orders of magnitude time will be saved,
+    # especially for a large dictionary.
 
 
 if __name__ == "__main__":
