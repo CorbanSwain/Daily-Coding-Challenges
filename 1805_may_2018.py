@@ -576,7 +576,101 @@ def _180526():
 
     Hint: Try preprocessing the dictionary into a more efficient data structure
     to speed up queries."""
-    pass
+
+    class Entry:
+        def __init__(self, s):
+            self.s = s
+
+        def __str__(self):
+            return self.s
+
+    class Node:
+        def __init__(self, value, depth=-1):
+            self.value = value
+            self._depth = depth
+            self.sub_nodes = {}
+            self.entries = []
+
+        def __getitem__(self, key):
+            try:
+                return self.sub_nodes[key]
+            except KeyError:
+                return None
+
+        def __setitem__(self, key, value):
+            self.sub_nodes[key] = value
+
+        def parse_entries(self, new_entries=None):
+            if new_entries is not None:
+                self.entries = new_entries
+            idx = self._depth + 1
+            for entry in self.entries:
+                try:
+                    c = entry.s[idx]
+                except IndexError:
+                    continue
+                if self[c] is None:
+                    self[c] = Node(c, idx)
+                self[c].entries.append(entry)
+
+            # base case comes when self.sub_nodes is an empty dict
+            for n in self.sub_nodes.values():
+                n.parse_entries()
+            return None  # modification in place
+
+    class Autocompleter:
+        def __init__(self, dictionary=None):
+            self.dictionary = dictionary
+            self._tree_dict = None
+
+        # for brute force, we can just look at every item in the list
+        def autocomplete_bf(self, query):
+            return [s for s in self.dictionary
+                    if query in s and s.index(query) is 0]
+
+        # alternatively we can construct a tree where each node layer contains
+        # a list of the items that have a character in each successive position
+        @property
+        def tree_dict(self):
+            if self._tree_dict is None:
+                entries = [Entry(s) for s in self.dictionary]
+                self._tree_dict = Node('')
+                self._tree_dict.parse_entries(entries)
+            return self._tree_dict
+
+        def autocomplete(self, query):
+            node = self.tree_dict
+            for c in query:
+                node = node[c]
+                if node is None:
+                    return []
+            return [e.s for e in node.entries]
+
+    # TESTS
+    d = ['dog', 'deer', 'deal']
+    q = 'de'
+    ac = Autocompleter(d)
+    assert set(ac.autocomplete_bf(q)) == set(['deer', 'deal'])
+    assert set(ac.autocomplete(q)) == set(['deer', 'deal'])
+
+    from timeit import timeit
+    from random import randint
+
+    def wrap(statement, *args):
+        def fun():
+            statement(*args)
+        return fun
+
+    d = [str(randint(0, int(1e7))) for _ in range(int(5e5))]
+    ac = Autocompleter(d)
+    q = '9542'
+    n_queries = 1000
+    print(' Brute force: %8.4f s' % timeit(wrap(ac.autocomplete_bf, q),
+                                          number=n_queries))
+    print('Compile tree: %8.4s s' % timeit(wrap(ac.autocomplete, ''),
+                                            number=1))
+    print(' Tree Method: %8.4f s' % timeit(wrap(ac.autocomplete, q),
+                                          number=n_queries))
 
 
 if __name__ == "__main__":
