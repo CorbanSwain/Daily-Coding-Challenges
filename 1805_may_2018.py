@@ -233,7 +233,8 @@ def _180519():
 
 
 def _180520():
-    """This problem was asked by Jane Street.
+    """
+    This problem was asked by Jane Street.
 
     cons(a, b) constructs a pair, and car(pair) and cdr(pair) returns the first
     and last element of that pair. For example, car(cons(3, 4)) returns 3, and
@@ -246,7 +247,8 @@ def _180520():
             return f(a, b)
     return pair
 
-    Implement car and cdr."""
+    Implement car and cdr.
+    """
 
     def cons(a, b):
         def pair(f):
@@ -669,7 +671,7 @@ def _180526():
     d = map(lambda _: str(randint(0, int(1e7))), range(int(1e6)))
     ac = Autocompleter(d)
     q = '9542'
-    n_queries = 100000
+    n_queries = 1000000
     print('Brute force (ls cmp): %8.4f s' % timeit(
         wrap(ac.autocomplete_bf, q, False),
         number=n_queries))
@@ -689,7 +691,8 @@ def _180526():
     # K = number of queries
     # L = number of chars in the query
 
-    # The brute force method executes in O(N * K) time
+    # The brute force method executes in O(N * K) time ... with list
+    # comprehension, but filter seems much faster
 
     # The compilation of the tree executes in O(N^2) time ( ... at worst -> all
     # elements the same ... maybe call set on the dictionary at creation)
