@@ -757,6 +757,7 @@ def _180527():
     5: 5
     '''
 
+
 def _180528():
     """
     This problem was asked by Amazon.
@@ -768,9 +769,9 @@ def _180528():
     distinct characters is "bcb".
     """
 
-    # at each position we can keep track of the number of distinct caracters
+    # at each position we can keep track of the number of distinct characters
     # recursion might be our friend here
-    # subtract one from k upon encountering the same charater then call again
+    # subtract one from k upon encountering the same character then call again
     # with the substring
     # need to start at each position in the string ... maybe also pass an
     # index in the recursive loop
@@ -827,7 +828,6 @@ def _180528():
     print('Method 2: %10.4f s' % timeit(wrap(find_long_2, k, s)))
     # > Method 1:     5.4519 s
     # > Method 2:     2.3880 s
-
 
 
 if __name__ == "__main__":
