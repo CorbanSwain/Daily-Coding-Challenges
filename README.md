@@ -1,4 +1,4 @@
-# Daily Coding Challenges [![Generic badge](https://img.shields.io/badge/completed-13-green.svg)](https://shields.io/)
+# Daily Coding Challenges [![Generic badge](https://img.shields.io/badge/completed-12-green.svg?longCache=true&style=for-the-badge)]()
 My answers to daily coding challenges from 
 [dailycodingproblem.com](https://www.dailycodingproblem.com/)
 
