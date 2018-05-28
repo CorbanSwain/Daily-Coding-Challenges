@@ -704,7 +704,8 @@ def _180526():
 
 
 def _180527():
-    """This problem was asked by Amazon.
+    """
+    This problem was asked by Amazon.
 
     There exists a staircase with N steps, and you can climb up either 1 or 2
     steps at a time. Given N, write a function that returns the number of unique
@@ -720,7 +721,8 @@ def _180527():
 
     What if, instead of being able to climb 1 or 2 steps at a time, you could
     climb any number from a set of positive integers X? For example, if
-    X = {1, 3, 5}, you could climb 1, 3, or 5 steps at a time."""
+    X = {1, 3, 5}, you could climb 1, 3, or 5 steps at a time.
+    """
 
     from functools import reduce
 
@@ -730,12 +732,8 @@ def _180527():
         if num_steps is None:
             return ways_to_climb(n, 1) + ways_to_climb(n, 2)
         n = n - num_steps
-        if n < 0:
-            return 0
-        elif n == 0:
-            return 1
-        else:
-            return ways_to_climb(n)
+        return 0 if n < 0 else 1 if n == 0 else ways_to_climb(n)
+
 
     # for the advanced case, simply go through the set of possible steps in
     # the initial setup
@@ -744,14 +742,8 @@ def _180527():
             return reduce(
                 lambda tot, x: tot + ways_to_climb_2(n, step_set, x),
                 step_set, 0)
-
         n = n - num_steps
-        if n < 0:
-            return 0
-        elif n == 0:
-            return 1
-        else:
-            return ways_to_climb_2(n, step_set)
+        return 0 if n < 0 else 1 if n == 0 else ways_to_climb_2(n, step_set)
 
     # TESTS
     assert ways_to_climb(4) == 5
@@ -765,6 +757,78 @@ def _180527():
     5: 5
     '''
 
+def _180528():
+    """
+    This problem was asked by Amazon.
+
+    Given an integer k and a string s, find the length of the longest
+    substring that contains at most k distinct characters.
+
+    For example, given s = "abcba" and k = 2, the longest substring with k
+    distinct characters is "bcb".
+    """
+
+    # at each position we can keep track of the number of distinct caracters
+    # recursion might be our friend here
+    # subtract one from k upon encountering the same charater then call again
+    # with the substring
+    # need to start at each position in the string ... maybe also pass an
+    # index in the recursive loop
+    # base case: k = 0 -> return length
+    # ixd == len(s) -> return length
+    def find_long(k, s):
+        return max(map(lambda i: _find_long_recurse(k, s, i), range(len(s))))
+
+    def _find_long_recurse(k, s, idx=0, char_set=None, length=0):
+        if idx == len(s):
+            return length
+
+        char_set = char_set if char_set is not None else set()
+        char_set.add(s[idx])
+
+        if len(char_set) > k:
+            return length
+        else:
+            return _find_long_recurse(k, s, idx + 1, char_set, length + 1)
+
+    # This runs in O(N^2) time -> looking through every remaining element for
+    # each position
+
+    # probably make more sense to do thin in a simple loop
+    def find_long_2(k, s):
+        if len(s) == 0 or k < 1:
+            return 0
+        best = -1
+        idx = -1
+        while best < len(s) - idx:
+            char_set = set()
+            run_length = 0
+            idx += 1
+            for char in s[idx:]:
+                char_set.add(char)
+                if len(char_set) > k:
+                    best = run_length if run_length > best else best
+                    break
+                else:
+                    run_length += 1
+        return best
+
+    def wrap(target, *args, **kwargs):
+        def f():
+            target(*args, **kwargs)
+        return f
+
+    assert find_long(2, 'abcba') == 3
+    assert find_long_2(2, 'abcba') == 3
+
+    from timeit import timeit
+    k, s = 2, 'abcba'
+    print('Method 1: %10.4f s' % timeit(wrap(find_long, k, s)))
+    print('Method 2: %10.4f s' % timeit(wrap(find_long_2, k, s)))
+    # > Method 1:     5.4519 s
+    # > Method 2:     2.3880 s
+
+
 
 if __name__ == "__main__":
-    _180527()
+    _180528()
