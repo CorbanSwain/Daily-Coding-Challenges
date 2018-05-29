@@ -795,7 +795,7 @@ def _180528():
     # This runs in O(N^2) time -> looking through every remaining element for
     # each position
 
-    # probably make more sense to do thin in a simple loop
+    # probably makes more sense to do this in a simple loop
     def find_long_2(k, s):
         if len(s) == 0 or k < 1:
             return 0
@@ -830,5 +830,62 @@ def _180528():
     # > Method 2:     2.3880 s
 
 
+def _180529():
+    """
+    This problem was asked by Google.
+
+    The area of a circle is defined as πr^2. Estimate π to 3 decimal places
+    using a Monte Carlo method.
+
+    Hint: The basic equation of a circle is x^2 + y^2 = r^2.
+    """
+    from random import random
+
+    # for a fouth of a unit circle (r = 1) with in a unit square (s = 1)
+    # the area inside should be A_in = pi/4 while the total area A_tot = 1
+    # therefore A_in / A_tot will approach pi / 4
+    # we'll use this ratio times 4 to be our estimator for pi
+    # a random dart in the unit square will be our estimator ...
+    # how to assess precision?  error should go down as the number of darts
+    # go up ... unsure of the specific formula
+    # ... of course, since we are squaring the random numbers we should
+    # square the precision and take the inverse to get the necessary number
+    # of itterations
+
+    def mc_pi(precision=1e-3, n=None) -> float:
+        n = round(1 / (precision ** 2)) if not n else n
+        n_in = 0
+        for _ in range(n):
+            r = random() ** 2 + random() ** 2
+            if r <= 1:
+                n_in += 1
+        return 4 * n_in / n
+
+    # TESTS
+    from math import pi
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    pi_est = mc_pi()
+    assert abs(pi_est - pi) <= 5e-3
+    print('PI estimate: %f' % pi_est)
+    print('Error:       %f' % abs(pi_est - pi))
+    # > PI estimate: 3.141464
+    # > Error:       0.000129
+
+    vals = np.unique(np.round(np.logspace(0, 6, num=15))).astype(np.int)
+    n_reps = 10
+    x = np.repeat(vals, n_reps)
+    y = [abs(mc_pi(n=v) - pi) for v in x]
+    fig = plt.figure(1)
+    ax = fig.subplots()
+    ax.scatter(x, y, s=2**2)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_ylim([min(y), max(y)])
+    ax.set_xlim([min(x), max(x)])
+    plt.show()
+
+
 if __name__ == "__main__":
-    _180528()
+    _180529()
