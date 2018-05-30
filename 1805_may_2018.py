@@ -887,5 +887,46 @@ def _180529():
     plt.show()
 
 
+def _180530():
+    """
+    This problem was asked by Facebook.
+
+    Given a stream of elements too large to store in memory, pick a random
+    element from the stream with uniform probability.
+    """
+
+    from random import random
+
+    # couldn't figure this one out ... used the reference here
+    # http://www.cs.cmu.edu/~avrim/ML07/lect1104.pdf
+
+    # I'm assuming stream is an object which has been implemented in some
+    # pythonic manner with stream.__iter__() defined.
+    def rand_sample(stream):
+        length = 0
+        pick = None
+        for v in stream:
+            length += 1
+            if random() < 1 / length:
+                pick = v
+        if length is not 0:
+            return pick
+        else:
+            raise ValueError('cannot sample from an empty stream.')
+
+    # TEST
+    from functools import reduce
+
+    n = 10
+    reps = int(1e5)
+    rng = range(n)
+    count = reduce(
+        lambda x, _: x + (1 if rand_sample(rng) is 0 else 0),
+        range(reps), 0
+    )
+    err = abs(count / reps - 1 / n)
+    assert err <= 1e-2
+
+
 if __name__ == "__main__":
-    _180529()
+    _180530()
