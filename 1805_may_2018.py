@@ -921,12 +921,108 @@ def _180530():
     reps = int(1e5)
     rng = range(n)
     count = reduce(
-        lambda x, _: x + (1 if rand_sample(rng) is 0 else 0),
-        range(reps), 0
-    )
+        lambda x, _: (x + 1) if rand_sample(rng) is 0 else x,
+        range(reps), 0)
     err = abs(count / reps - 1 / n)
     assert err <= 1e-2
 
 
+def _180531():
+    """
+    You run an e-commerce website and want to record the last N order ids in a
+    log. Implement a data structure to accomplish this, with the following API:
+
+    record(order_id): adds the order_id to the log
+    get_last(i): gets the ith last element from the log. i is guaranteed to be
+    smaller than or equal to N.
+
+    You should be as efficient with time and space as possible.
+    """
+
+    class Node:
+        def __init__(self, value, prev=None, nxt=None):
+            self.value = value
+            self.prev = prev
+            self.nxt = nxt
+
+    class OrderCache:
+        def __init__(self, maxLen):
+            self.cacheHead = None  # type: Node
+            self.cacheTail = None
+            if maxLen < 1:
+                raise ValueError('maxLen must an integer be greater than zero.')
+            self.maxLen = maxLen
+            self.length = 0
+
+        def record(self, order_id):
+            if self.maxLen == 1:
+                self.length = 1
+                self.cacheHead = Node(order_id)
+            else:
+                if self.length == self.maxLen:
+                    self.cacheTail = self.cacheTail.nxt
+                    del self.cacheTail.prev
+                else:
+                    self.length += 1
+
+                if self.cacheHead:
+                    self.cacheHead.nxt = Node(order_id, self.cacheHead)
+                    self.cacheHead = self.cacheHead.nxt
+                else:
+                    self.cacheHead = Node(order_id)
+                    self.cacheTail = self.cacheHead
+
+        def get_last(self, i):
+            if self.cacheHead:
+                n = self.cacheHead
+                while i > 1:
+                    n = n.prev
+                    i -= 1
+                return n.value
+            else:
+                raise ValueError('cannot get item from an empty cache')
+
+    # implemented with singly linked list
+    # O(1) in time to add item
+    # list is O(n) in space
+    # O(n) in time to get last item
+
+    # here is a much simpler implementation ... not sure about effeciency in
+    # time and space though
+    class OrderCache_2:
+        def __init__(self, maxLen):
+            self.cache = []
+            self.maxLen = maxLen
+
+        def record(self, order_id):
+            if len(self.cache) == self.maxLen:
+                del self.cache[-1]
+            self.cache.insert(0, order_id)
+
+        def get_last(self, i):
+            return self.cache[i - 1]
+
+    # TEST
+    n_vals = 500
+    def test_fun(cls):
+        def test():
+            oc = cls(n_vals)
+            for i in range(n_vals * 10):
+                oc.record(32354246)
+            for i in range(n_vals * 10):
+                oc.get_last(1)
+                oc.get_last(n_vals // 2)
+                oc.get_last(n_vals)
+        return test
+
+    from timeit import timeit
+    num_iter = 10
+    print("Method 1: %10.5f s" % timeit(test_fun(OrderCache), number=num_iter))
+    print("Method 2: %10.5f s" % timeit(test_fun(OrderCache_2),
+                                        number=num_iter))
+
+    # > Method 1:    4.23374 s
+    # > Method 2:    0.09192 s
+
 if __name__ == "__main__":
-    _180530()
+    _180531()
